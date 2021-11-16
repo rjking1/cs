@@ -1,9 +1,9 @@
 #from coinspot import CoinSpot
 
 from coinspot import CoinSpot
+from config import KEY, SECRET
 
-cs = CoinSpot("59c5c58c9cf4916fe50fbd58e5c931e3",
-              "FL9BD12TYHFU1ADUVDXZB7P4C9964YEY9XG3JWUVDV0E48JHNYQGL76KK1FREL7ZDY3LPAKKL1QWVK8K")
+cs = CoinSpot(KEY, SECRET)
 
 bal = cs.my_balances()
 print("balances")
