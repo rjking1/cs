@@ -1,0 +1,4 @@
+.mypy_cache/
+*.log
+*.log.*
+__pycache__/
