@@ -55,9 +55,8 @@ for ucoin in BUY_CODES:
         rate = round((float(latest_prices[coin]["last"]) * 0.1 + float(latest_prices[coin]["bid"]) * 0.9), 6)
         amt = min(aud_avail, MAX_TRADE_AUD) / rate * 0.999  # 0.999 to reduce slightly so as not to exceed avail bal when rounding
         amt = round(amt, 6)
-        sell_rate = round(rate * SELL_ABOVE_BUY, 6)
 
-        cs.my_buy(ucoin, amt, rate)
+        #cs.my_buy(ucoin, amt, rate)
         print("created buy order for", ucoin, "amount:", amt, "rate", rate)
         
         # check if the buy was completed -- if it is still in the buy orders then nobody bought it so cancel it
@@ -66,15 +65,20 @@ for ucoin in BUY_CODES:
         buy_orders = cs.my_orders()["buyorders"]
         #print(buy_orders)
         if buying_coin(coin, buy_orders):
-            cancel_coin(coin, buy_orders)
+            #cancel_coin(coin, buy_orders)
             print("cancelled buy order for", ucoin, "as not completed")
         else:
+            # need to reduce sell amount as rounding can affect things
+            # and increase sell rate to compensate
+            amt = round(amt * 0.999, 6)
+            sell_rate = rate * SELL_ABOVE_BUY
+            sell_rate = round(sell_rate * 1.001001, 6)
             sleep(0.5)
-            cs.my_sell(ucoin, amt, sell_rate)
+            #cs.my_sell(ucoin, amt, sell_rate)
             sleep(0.5)
             print("created sell order for", ucoin, "amount:", amt, "rate", sell_rate)
         
-        aud_avail -= amt * rate
-        if aud_avail < MIN_TRADE_AUD:
-            print("available balance low -- exiting", aud_avail)
-            quit()
+            aud_avail -= amt * rate
+            if aud_avail < MIN_TRADE_AUD:
+                print("available balance low -- exiting", aud_avail)
+                quit()
