@@ -23,6 +23,11 @@ print("balances coins")
 for coin in balances:
     print(coin, balances[coin])
 
+aud_avail = balances["aud"]
+if aud_avail < MIN_TRADE_AUD:
+    print("insufficient balance to submit any buy orders", aud_avail)
+    quit()
+
 print("my buy orders price/$total")
 # should be none
 buy_orders = cs.my_orders()["buyorders"]
@@ -43,12 +48,8 @@ for latest_price in latest_prices:
 
 print("--------------------------")
 
-aud_avail = balances["aud"]
-if aud_avail < MIN_TRADE_AUD:
-    print("insufficient balance to submit any buy orders", aud_avail)
-    quit()
-
 # run thru all possible coins to consider buying
+random.shuffle(BUY_CODES)
 for ucoin in BUY_CODES:
     coin = ucoin.lower()
     if not buying_coin(ucoin, buy_orders):
@@ -56,16 +57,19 @@ for ucoin in BUY_CODES:
         amt = min(aud_avail, MAX_TRADE_AUD) / rate * 0.999  # 0.999 to reduce slightly so as not to exceed avail bal when rounding
         amt = round(amt, 6)
 
-        #cs.my_buy(ucoin, amt, rate)
+        if PRODUCTION:
+            cs.my_buy(ucoin, amt, rate)
         print("created buy order for", ucoin, "amount:", amt, "rate", rate)
         
         # check if the buy was completed -- if it is still in the buy orders then nobody bought it so cancel it
         # else if completed/bought - then create sell order
-        sleep(15)
+        if PRODUCTION:
+            sleep(15)
         buy_orders = cs.my_orders()["buyorders"]
         #print(buy_orders)
         if buying_coin(coin, buy_orders):
-            #cancel_coin(coin, buy_orders)
+            if PRODUCTION:
+                cancel_coin(coin, buy_orders)
             print("cancelled buy order for", ucoin, "as not completed")
         else:
             # need to reduce sell amount as rounding can affect things
@@ -73,9 +77,10 @@ for ucoin in BUY_CODES:
             amt = round(amt * 0.999, 6)
             sell_rate = rate * SELL_ABOVE_BUY
             sell_rate = round(sell_rate * 1.001001, 6)
-            sleep(0.5)
-            #cs.my_sell(ucoin, amt, sell_rate)
-            sleep(0.5)
+            if PRODUCTION:
+                sleep(0.5)
+                cs.my_sell(ucoin, amt, sell_rate)
+                sleep(0.5)
             print("created sell order for", ucoin, "amount:", amt, "rate", sell_rate)
         
             aud_avail -= amt * rate
