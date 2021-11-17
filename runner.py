@@ -24,15 +24,17 @@ for coin in balances:
     print(coin, balances[coin])
 
 aud_avail = balances["aud"]
-if aud_avail < MIN_TRADE_AUD:
-    print("insufficient balance to submit any buy orders", aud_avail)
-    quit()
 
 print("my buy orders price/$total")
 # should be none
 buy_orders = cs.my_orders()["buyorders"]
 for order in buy_orders:
     print(order["coin"], order["rate"], order["total"])
+    aud_avail -= order["total"]
+
+if aud_avail < MIN_TRADE_AUD:
+    print("insufficient balance to submit any buy orders", aud_avail)
+    quit()
 
 print("my sell orders price/$total")
 sell_orders = cs.my_orders()["sellorders"]
