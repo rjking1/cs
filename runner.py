@@ -4,6 +4,11 @@ from time import sleep
 import random
 
 
+def check_response(what, resp):
+    if resp["status"] != "ok":
+        print(what, "response", resp["status"]) #, resp["message"])
+
+
 def buying_coin(coin, buy_orders):
     for buys in buy_orders:
         already_buying_coin = buys["coin"]
@@ -15,7 +20,8 @@ def buying_coin(coin, buy_orders):
 def cancel_coin(coin, buy_orders):
     for order in buy_orders:
         if order["coin"].upper() == coin.upper():
-            cs.my_buy_cancel(order["_id"])
+            resp = cs.my_buy_cancel(order["_id"])
+            check_response("cancel", resp)
 
 
 cs = CoinSpot(KEY, SECRET)
@@ -72,7 +78,8 @@ for ucoin in BUY_CODES:
     amt = round(min(aud_avail, MAX_TRADE_AUD) / rate * 0.999, 6)
 
     if PRODUCTION:
-        cs.my_buy(ucoin, amt, rate)
+        resp = cs.my_buy(ucoin, amt, rate)
+        check_response("buy", resp)
     buys_added[ucoin] = {"amt": amt, "rate": rate}
     print("### created buy order for", ucoin, "amount:", amt, "rate", rate)
 
@@ -100,8 +107,9 @@ for ucoin in buys_added:
         rate = buys_added[ucoin]["rate"]
         # reduce sell amount slightly to allow for fee???
         amt = round(amt * 0.99, 6)
-        sell_rate = round(rate * SELL_ABOVE_BUY, 6)
+        rate = round(rate * SELL_ABOVE_BUY, 6)
         if PRODUCTION:
-            cs.my_sell(ucoin, amt, sell_rate)
+            resp = cs.my_sell(ucoin, amt, rate)
+            check_response("sell", resp)
         print("### created sell order for", ucoin,
-              "amount:", amt, "rate", sell_rate)
+              "amount:", amt, "rate", rate)
