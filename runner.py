@@ -34,19 +34,17 @@ for latest_price in latest_prices:
         print(latest_price, " bid ", coin["bid"],
               "ask", coin["ask"], "last", coin["last"])
 
-balances = cs.my_balances()["balance"]
 print("--- Coin balances and approx value using last ---")
-tot = 0.0
+balances = cs.my_balances()["balance"]
+aud_avail = balances["aud"]
+tot = aud_avail
+print('aud', tot)
 for coin in balances:
     if coin != 'aud':
         subtot = round(balances[coin] * float(latest_prices[coin]["last"]), 2)
-    else:
-        subtot = 0
-    tot += subtot
-    print(coin, balances[coin], subtot if coin != 'aud' else '')
+        print(coin, balances[coin], subtot)
+        tot += subtot
 print('Approx Total', tot)
-
-aud_avail = balances["aud"]
 
 if aud_avail < MIN_TRADE_AUD:
     print("*** Insufficient balance to submit any buy orders", aud_avail)
