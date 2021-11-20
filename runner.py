@@ -94,11 +94,10 @@ if PRODUCTION:
 buy_orders = cs.my_orders()["buyorders"]
 # print(buy_orders)
 for ucoin in buys_added:
-    coin = ucoin.lower()
-    if buying_coin(coin, buy_orders):
+    if buying_coin(ucoin, buy_orders):
         if PRODUCTION:
-            cancel_coin(coin, buy_orders)
-        print("*** cancelled buy order for", ucoin, "as not completed")
+            cancel_coin(ucoin, buy_orders)
+            print("*** cancelled buy order for", ucoin, "as not completed")
     else:
         # else completed=bought so create sell order
         # get buy order details for coin
@@ -110,6 +109,8 @@ for ucoin in buys_added:
         if PRODUCTION:
             resp = cs.my_sell(ucoin, amt, rate)
             if not check_response("sell", resp):
-                cancel_coin(coin, buy_orders)
-        print("### created sell order for", ucoin,
-              "amount:", amt, "rate", rate)
+                cancel_coin(ucoin, buy_orders)
+                print("*** cancelled buy order for", ucoin, "as not completed")
+            else:
+                print("### created sell order for", ucoin,
+                    "amount:", amt, "rate", rate)
