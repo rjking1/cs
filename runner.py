@@ -7,6 +7,7 @@ import random
 def check_response(what, resp):
     if resp["status"] != "ok":
         print(what, "response", resp["status"]) #, resp["message"])
+    return resp["status"] == "ok"
 
 
 def buying_coin(coin, buy_orders):
@@ -108,6 +109,7 @@ for ucoin in buys_added:
         rate = round(rate * SELL_ABOVE_BUY, 6)
         if PRODUCTION:
             resp = cs.my_sell(ucoin, amt, rate)
-            check_response("sell", resp)
+            if not check_response("sell", resp):
+                cancel_coin(coin, buy_orders)
         print("### created sell order for", ucoin,
               "amount:", amt, "rate", rate)
