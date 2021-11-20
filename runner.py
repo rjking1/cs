@@ -71,8 +71,8 @@ random.shuffle(BUY_CODES)
 for ucoin in BUY_CODES:
     coin = ucoin.lower()
 
-    rate = round(float(latest_prices[coin]["bid"]) * 0.9
-                 + float(latest_prices[coin]["ask"]) * 0.1, 6)
+    rate = round(float(latest_prices[coin]["bid"]) * (1.0 - ASK_V_BID_FACTOR)
+                 + float(latest_prices[coin]["ask"]) * ASK_V_BID_FACTOR, 6)
     # 0.999 to reduce slightly so as not to exceed avail bal when rounding
     amt = round(min(aud_avail, MAX_TRADE_AUD) / rate * 0.999, 6)
 
