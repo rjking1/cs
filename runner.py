@@ -47,12 +47,8 @@ for coin in balances:
         tot += subtot
 print('Approx Total', tot)
 
-if aud_avail < MIN_TRADE_AUD:
-    print("*** Insufficient balance to submit any buy orders", aud_avail)
-    quit()
-
 print("--- My buy orders price/$total ---")
-# should be none
+# usually be none of what we are allowed to buy !
 buy_orders = cs.my_orders()["buyorders"]
 for order in buy_orders:
     print(order["coin"], order["rate"], order["total"])
@@ -62,6 +58,10 @@ print("--- My sell orders price/$total ---")
 sell_orders = cs.my_orders()["sellorders"]
 for order in sell_orders:
     print(order["coin"], order["rate"], order["total"])
+
+if aud_avail < MIN_TRADE_AUD:
+    print("*** Insufficient balance to submit any buy orders", aud_avail)
+    quit()
 
 print("--------------------------")
 
