@@ -74,7 +74,7 @@ for ucoin in BUY_CODES:
     rate = round(float(latest_prices[coin]["bid"]) * (1.0 - ASK_V_BID_FACTOR)
                  + float(latest_prices[coin]["ask"]) * ASK_V_BID_FACTOR, 6)
     # 0.999 to reduce slightly so as not to exceed avail bal when rounding
-    amt = round(min(aud_avail, MAX_TRADE_AUD) / rate * 0.999, 6)
+    amt = round(min(aud_avail, MAX_TRADE_AUD) / rate * 0.999, 8)
 
     if PRODUCTION:
         resp = cs.my_buy(ucoin, amt, rate)
@@ -103,8 +103,8 @@ for ucoin in buys_added:
         # get buy order details for coin
         amt = buys_added[ucoin]["amt"]
         rate = buys_added[ucoin]["rate"]
-        # reduce sell amount slightly to allow for fee???
-        amt = round(amt * 0.99, 6)
+        # reduce sell amount slightly to allow for fee using new control var
+        amt = round(amt * SELL_AMT_FACTOR, 8)
         rate = round(rate * SELL_ABOVE_BUY, 6)
         if PRODUCTION:
             resp = cs.my_sell(ucoin, amt, rate)
