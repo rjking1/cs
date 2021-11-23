@@ -73,13 +73,13 @@ for ucoin in BUY_CODES:
 
     rate = round(float(latest_prices[coin]["bid"]) * (1.0 - ASK_V_BID_FACTOR)
                  + float(latest_prices[coin]["ask"]) * ASK_V_BID_FACTOR, 6)
-    # 0.999 to reduce slightly so as not to exceed avail bal when rounding
-    amt = round(min(aud_avail, MAX_TRADE_AUD) / rate * 0.999, 8)
+    # 0.9999 to reduce slightly so as not to exceed avail bal when rounding
+    amt = round(min(aud_avail, MAX_TRADE_AUD) * 0.9999 / rate, 8)
 
     if PRODUCTION:
         resp = cs.my_buy(ucoin, amt, rate)
         check_response("buy", resp)
-    buys_added[ucoin] = {"amt": amt, "rate": rate}
+    buys_added[ucoin] = {"amt": amt, "rate": rate, "sell": False}
     print("### created buy order for", ucoin, "amount:", amt, "rate", rate)
 
     aud_avail -= amt * rate
@@ -88,7 +88,7 @@ for ucoin in BUY_CODES:
 
 # print(buys_added)
 if PRODUCTION:
-    sleep(30)
+    sleep(40)
 
 # check if the buy orders were completed -- if buy order exists then nobody bought it so cancel it
 buy_orders = cs.my_orders()["buyorders"]
@@ -99,7 +99,15 @@ for ucoin in buys_added:
             cancel_coin(ucoin, buy_orders)
             print("*** cancelled buy order for", ucoin, "as not completed")
     else:
-        # else completed=bought so create sell order
+        buys_added[ucoin]["sell"] = True
+
+if PRODUCTION:
+    sleep(15)
+
+# repeat check after delay to give late buy order time to settle and then create sell orders
+for ucoin in buys_added:
+    if buys_added[ucoin]["sell"] == True:
+        # completed=bought so create sell order
         # get buy order details for coin
         amt = buys_added[ucoin]["amt"]
         rate = buys_added[ucoin]["rate"]
@@ -110,7 +118,9 @@ for ucoin in buys_added:
             resp = cs.my_sell(ucoin, amt, rate)
             if not check_response("sell", resp):
                 cancel_coin(ucoin, buy_orders)
-                print("*** cancelled buy order for", ucoin, "as not completed")
+                print("*** cancelled buy order for", ucoin, "as not completed (in sell check)")
             else:
                 print("### created sell order for", ucoin,
                     "amount:", amt, "rate", rate)
+
+quit()
